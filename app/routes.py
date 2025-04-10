@@ -4,6 +4,26 @@ from .models import Prediction
 from flask import current_app as app
 from sqlalchemy import func
 import json
+from flask import request, redirect, url_for, flash
+
+@app.route("/submit_prediction", methods=["POST"])
+def submit_prediction():
+    if request.method == "POST":
+        try:
+            # Grab form data (adjust as per form field names)
+            user_name = request.form["name"]
+            match = request.form["match"]
+            prediction = request.form["prediction"]
+
+            # Example: Save to DB
+            db.session.add(Prediction(name=user_name, match=match, prediction=prediction))
+            db.session.commit()
+            flash("Prediction submitted successfully!", "success")
+            return redirect(url_for("index"))
+
+        except Exception as e:
+            flash(f"Error submitting prediction: {str(e)}", "danger")
+            return redirect(url_for("index"))
 
 @app.route("/")
 def index():
@@ -45,4 +65,5 @@ def load_predictions_from_json(path="predictions_vs_actual.json"):
                 name=user, match=match, prediction=prediction, actual=actual, score=score
             ))
     db.session.commit()
+A
 
